@@ -1,5 +1,6 @@
 import static org.junit.Assert.*;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -8,23 +9,100 @@ import org.junit.Test;
 
 
 public class JobMatcherTest {
-    JobMatcher target = new JobMatcher();
+    //JobMatcher target = new JobMatcher();
     @Test
-    public void TestIsSatisfactory() {
+    public void TestKnownFalse() {
         assertFalse(isSatisfactory("A1 B3 C2 D4 E5"));
         assertFalse(isSatisfactory("A2 B1 C5 D3 E4"));
     }
-
+    
     @Test
-    public void testRandomPairing() {
-        for (int i = 0; i < 1000; i++) {
-            String rp = randomPairing();
-            if (isSatisfactory(rp)) {
-                System.out.println(rp);
+    public void testSampleData(){
+        ArrayList<ArrayList<Character>> c = makeExampleCompanies();
+        ArrayList<ArrayList<Character>> p = makeExampleProgrammers();
+        String result = JobMatcher.makePairs(c, p);
+        assertTrue(isSatisfactory(result));
+    }
+    
+    @Test
+    public void testRandomData() {
+        for (int i = 0; i < 100; i++) {
+            for (int j = 1; j < 10; j++) {
+                ArrayList<ArrayList<Character>> c = randomCompanies(j);
+                ArrayList<ArrayList<Character>> p = randomProgrammers(j);
+                String result = JobMatcher.makePairs(c, p);
+                System.out.println(result);
+                //assertTrue(isSatisfactory(result));
             }
         }
     }
     
+    @Test
+    public void testParseData() {
+        ArrayList<ArrayList<Character>> companies = null;
+        ArrayList<ArrayList<Character>> programmers = null;
+        try {
+            companies = JobMatcher.parseInput("/home/mart2967/git/AlgorithmsLab5/AlgorithmsLab5/src/testData.txt", true);
+            programmers = JobMatcher.parseInput("/home/mart2967/git/AlgorithmsLab5/AlgorithmsLab5/src/testData.txt", false);
+        } catch (FileNotFoundException e) {
+            //assert.fail("exception");
+        }
+        
+        assertEquals(makeExampleCompanies(), companies);
+        assertEquals(makeExampleProgrammers(), programmers);
+    }
+    
+    @Test
+    public void testCompanyGeneration() {
+        assertNotNull(randomCompanies(5));
+        assertNotNull(randomProgrammers(5));
+    }
+    
+    public ArrayList<ArrayList<Character>> randomCompanies(int size) {
+        ArrayList<ArrayList<Character>> output = new ArrayList<ArrayList<Character>>();
+        Random rand = new Random();
+        for (int i = 0; i < size; i++) {
+            ArrayList<Character> column = new ArrayList<Character>();
+            ArrayList<Character> rankings = new ArrayList<Character>();
+            for (int x = 0; x < size; x++) {
+                rankings.add((char) (x+49));
+            }
+            for (int j = 0; j < size + 1; j++) {
+                if (j == 0) {
+                    column.add((char) (i+65));
+                } else {
+                    Character r = rankings.get(rand.nextInt(rankings.size()));
+                    column.add(r);
+                    rankings.remove(r);
+                }
+            }
+            output.add(column);
+        }
+        return output;
+    }
+    
+    public ArrayList<ArrayList<Character>> randomProgrammers(int size) {
+        ArrayList<ArrayList<Character>> output = new ArrayList<ArrayList<Character>>();
+        Random rand = new Random();
+        for (int i = 0; i < size; i++) {
+            ArrayList<Character> column = new ArrayList<Character>();
+            ArrayList<Character> rankings = new ArrayList<Character>();
+            for (int x = 0; x < size; x++) {
+                rankings.add((char) (x+65));
+            }
+            for (int j = 0; j < size + 1; j++) {
+                if (j == 0) {
+                    column.add((char) (i+49));
+                } else {
+                    Character r = rankings.get(rand.nextInt(rankings.size()));
+                    column.add(r);
+                    rankings.remove(r);
+                }
+            }
+            output.add(column);
+        }
+        return output;
+    }
     public String randomPairing() {
         Random rand = new Random();
         ArrayList<ArrayList<Character>> c = makeExampleCompanies();
@@ -49,8 +127,8 @@ public class JobMatcherTest {
     
     private boolean isSatisfactory(String s) {
         boolean output = true;
-        ArrayList<ArrayList<Character>> c = makeExampleCompanies();
-        ArrayList<ArrayList<Character>> p = makeExampleProgrammers();
+        ArrayList<ArrayList<Character>> companies = makeExampleCompanies();
+        ArrayList<ArrayList<Character>> programmers = makeExampleProgrammers();
         ArrayList<String> matches = new ArrayList<String>(Arrays.asList(s.split(" ")));
         //System.out.println("########## " + s + " ##########");
         for (int i = 0; i < matches.size(); i++) {
@@ -67,8 +145,8 @@ public class JobMatcherTest {
 
                 
                 // subtract 49 to convert 1-indexed chars to 0 indexed integers, 65 to convert capital letters to 0-indexed integers
-                if ( (p.get(pair1[1]-49).indexOf(pair1[0]) < p.get(pair1[1]-49).indexOf(pair2[0])) ) { //P1 ranks C2 higher than C1 
-                    if( (c.get(pair2[0]-65).indexOf(pair2[1]) < c.get(pair2[0]-65).indexOf(pair1[1])) ) { //C2 ranks P1 higher than P2
+                if ( (programmers.get(pair1[1]-49).indexOf(pair1[0]) > programmers.get(pair1[1]-49).indexOf(pair2[0])) ) { //P1 ranks C2 higher than C1 
+                    if( (companies.get(pair2[0]-65).indexOf(pair2[1]) > companies.get(pair2[0]-65).indexOf(pair1[1])) ) { //C2 ranks P1 higher than P2
                         //System.out.print("UNSATISFACTORY: ");
                         output = false;
                     }
@@ -78,10 +156,6 @@ public class JobMatcherTest {
         }
         return output;
     }
-
-    //private int innerArrayIndex(char startOfInnerArray) {
-//
-    //}
 
     private ArrayList<ArrayList<Character>> makeExampleCompanies() {
         ArrayList<ArrayList<Character>> data = new ArrayList<ArrayList<Character>>();
