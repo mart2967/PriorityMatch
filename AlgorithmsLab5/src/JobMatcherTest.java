@@ -1,19 +1,16 @@
 import static org.junit.Assert.*;
-
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
-
 import org.junit.Test;
 
-
 public class JobMatcherTest {
-    //JobMatcher target = new JobMatcher();
+    
     @Test
     public void TestKnownFalse() {
-        assertFalse(isSatisfactory("A1 B3 C2 D4 E5"));
-        assertFalse(isSatisfactory("A2 B1 C5 D3 E4"));
+        assertFalse(isSatisfactory("A1 B3 C2 D4 E5", makeExampleCompanies(), makeExampleProgrammers()));
+        assertFalse(isSatisfactory("A2 B1 C5 D3 E4", makeExampleCompanies(), makeExampleProgrammers()));
     }
     
     @Test
@@ -21,7 +18,7 @@ public class JobMatcherTest {
         ArrayList<ArrayList<Character>> c = makeExampleCompanies();
         ArrayList<ArrayList<Character>> p = makeExampleProgrammers();
         String result = JobMatcher.makePairs(c, p);
-        assertTrue(isSatisfactory(result));
+        assertTrue(isSatisfactory(result, c, p));
     }
     
     @Test
@@ -31,8 +28,7 @@ public class JobMatcherTest {
                 ArrayList<ArrayList<Character>> c = randomCompanies(j);
                 ArrayList<ArrayList<Character>> p = randomProgrammers(j);
                 String result = JobMatcher.makePairs(c, p);
-                System.out.println(result);
-                //assertTrue(isSatisfactory(result));
+                assertTrue(isSatisfactory(result, c, p));
             }
         }
     }
@@ -45,17 +41,11 @@ public class JobMatcherTest {
             companies = JobMatcher.parseInput("/home/mart2967/git/AlgorithmsLab5/AlgorithmsLab5/src/testData.txt", true);
             programmers = JobMatcher.parseInput("/home/mart2967/git/AlgorithmsLab5/AlgorithmsLab5/src/testData.txt", false);
         } catch (FileNotFoundException e) {
-            //assert.fail("exception");
+            System.out.println();
         }
         
         assertEquals(makeExampleCompanies(), companies);
         assertEquals(makeExampleProgrammers(), programmers);
-    }
-    
-    @Test
-    public void testCompanyGeneration() {
-        assertNotNull(randomCompanies(5));
-        assertNotNull(randomProgrammers(5));
     }
     
     public ArrayList<ArrayList<Character>> randomCompanies(int size) {
@@ -103,7 +93,8 @@ public class JobMatcherTest {
         }
         return output;
     }
-    public String randomPairing() {
+    
+    private String randomPairing() {
         Random rand = new Random();
         ArrayList<ArrayList<Character>> c = makeExampleCompanies();
         ArrayList<ArrayList<Character>> p = makeExampleProgrammers();
@@ -125,12 +116,9 @@ public class JobMatcherTest {
         return output;
     }
     
-    private boolean isSatisfactory(String s) {
+    private boolean isSatisfactory(String s, ArrayList<ArrayList<Character>> companies, ArrayList<ArrayList<Character>> programmers) {
         boolean output = true;
-        ArrayList<ArrayList<Character>> companies = makeExampleCompanies();
-        ArrayList<ArrayList<Character>> programmers = makeExampleProgrammers();
         ArrayList<String> matches = new ArrayList<String>(Arrays.asList(s.split(" ")));
-        //System.out.println("########## " + s + " ##########");
         for (int i = 0; i < matches.size(); i++) {
             char[] pair1 = new char[2];
             pair1[0] = matches.get(i).charAt(0);
@@ -181,7 +169,7 @@ public class JobMatcherTest {
         return data;
     }
 
-    public static ArrayList<String> cloneList(ArrayList<String> input) {
+    private static ArrayList<String> cloneList(ArrayList<String> input) {
         ArrayList<String> output = new ArrayList<String>();
         for (String i: input) {
             output.add(i);
