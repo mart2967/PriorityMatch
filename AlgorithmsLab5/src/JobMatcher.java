@@ -10,7 +10,7 @@ import java.util.Scanner;
 /*
  * LAB 5
  * Max Marti
- * Katie Reddeman
+ * Katie Reddemann
  * 
  * Behold the algorithm
  * Become the algorithm
